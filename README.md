@@ -5,6 +5,8 @@ The [CFAx33](https://www.crystalfontz.com/product/cfa533tmikl-display-module-tex
 
 The CFA533-TMI-KL is used in the Electric Imp Factory BlinkUp Box.
 
+**To add this library to your project, add** `#require "CFAx33-KL.class.nut:1.0.1"` **to the top of your device code.**
+
 ## Class Usage
 
 #### Constructor
@@ -90,9 +92,9 @@ Set a callback function to be called when a keypress event is received from the 
 | ------------------- |
 | KEY_UP_PRESS |
 | KEY_DOWN_PRESS |
-| KEY_LEFT_PRESS | 
-| KEY_RIGHT_PRESS | 
-| KEY_ENTER_PRESS | 
+| KEY_LEFT_PRESS |
+| KEY_RIGHT_PRESS |
+| KEY_ENTER_PRESS |
 | KEY_EXIT_PRESS |
 | KEY_UP_RELEASE |
 | KEY_DOWN_RELEASE |
