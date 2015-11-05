@@ -5,7 +5,7 @@ The [CFAx33](https://www.crystalfontz.com/product/cfa533tmikl-display-module-tex
 
 The CFA533-TMI-KL is used in the Electric Imp Factory BlinkUp Box.
 
-**To add this library to your project, add** `#require "CFAx33-KL.class.nut:1.0.1"` **to the top of your device code.**
+**To add this library to your project, add** `#require "CFAx33KL.class.nut:1.0.1"` **to the top of your device code.**
 
 ## Class Usage
 
