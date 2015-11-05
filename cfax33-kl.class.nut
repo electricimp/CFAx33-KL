@@ -1,7 +1,8 @@
+
 // Class for interfacing with the Crystalfontz CFA533-KL/KS and CFA633-KL/KS serial LCDs
 class CFAx33KL {
-  
-  static version = [1, 0, 0];
+
+  static version = [1, 0, 1];
 
   // key codes for key activity reports
   static KEY_UP_PRESS = 1;
@@ -294,7 +295,7 @@ class CFAx33KL {
       }
       return _s16tou16(~crc);
   }
-  
+
   // signed short to unsigned short
   function _s16tou16(b) {
     local lowByte = b & 0xFF;
