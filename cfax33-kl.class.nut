@@ -1,4 +1,3 @@
-
 // Class for interfacing with the Crystalfontz CFA533-KL/KS and CFA633-KL/KS serial LCDs
 class CFAx33KL {
 
