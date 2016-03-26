@@ -9,6 +9,9 @@ The CFA533-TMI-KL is used in the Electric Imp Factory BlinkUp Box.
 
 ## Class Usage
 
+**Optional Callback Note:**  Most methods in this library contain an optional *callback* parameter.  If an optional callback is passed in, it will be called when the CFAx33KL acknowledges the command.  The callback function takes one parameter, a response table.  The response table will contain either an *err* key with an error message, or a *msg* key with the data received from the response packet.  A successful response often contains an empty array as the *msg*.
+
+
 #### Constructor
 
 The constructor takes one required parameter: an imp UART, which will be configured by the constructor.
@@ -17,23 +20,27 @@ The constructor takes one required parameter: an imp UART, which will be configu
 lcd <- CFAx33KL(hardware.uart6E);
 ```
 
-#### setText(*x*, *y*, *text*, [*callback*])
+#### setText(*index*, *row*, *text*, [*callback*])
 
-Sets the display at point x,y to the string 'text'. Maximum length of string 'text' is 16 characters. Optional callback will be called when the CFAx33KL acknowledges the command.
+The display contains 2 rows with 16 characters each.  The *#setText* method uses the *index* and *row* to position the display *text*.  The *index* parameter determines the starting position of the *text*, and can be any integer from 0 to 15. The length of the *text* plus the *index* must be less than 16.  The *row* can be either 0, to display text on the first row, or 1, to display text on the second row.  An optional callback can also be passed in, please see *Optional Callback Note* for details.
 
 ```Squirrel
-lcd.setText(0, 0, "Hello World!", function() {
-    server.log("Text received by display");
+lcd.setText(0, 0, "Hello World!", function(res) {
+    if("err" in res) {
+        server.error(res.err);
+    } else {
+        server.log("Text received by display");
+    }
 });
 ```
 
 #### setLine1(*text*, [*callback*])
 
-Clears the first line of the display and sets the first line to string 'text'. Maximum length of string 'text' is 16 characters. Optional callback will be called when the CFAx33KL acknowledges the command.
+Clears the first line of the display and sets the first line to string 'text'. Maximum length of string 'text' is 16 characters. An optional callback can also be passed in, please see *Optional Callback Note* for details.
 
 #### setLine2(*text*, [*callback*])
 
-Clears the second line of the display and sets the first line to string 'text'. Maximum length of string 'text' is 16 characters. Optional callback will be called when the CFAx33KL acknowledges the command.
+Clears the second line of the display and sets the second line to string 'text'. Maximum length of string 'text' is 16 characters. An optional callback can also be passed in, please see *Optional Callback Note* for details.
 
 ```Squirrel
 lcd.setLine1("Hello World!");
@@ -42,19 +49,20 @@ lcd.setLine2("I'm an LCD");
 
 #### clearAll([*callback*])
 
-Clears the entire display. Optional callback will be called when the CFAx33KL acknowledges the command.
+Clears the entire display.  An optional callback can also be passed in, please see *Optional Callback Note* for details.
 
 #### clearLine1([*callback*])
 
-Clears the first line of the display. Optional callback will be called when the CFAx33KL acknowledges the command.
+Clears the first line of the display. An optional callback can also be passed in, please see *Optional Callback Note* for details.
 
 #### clearLine2([*callback*])
 
-Clears the second line of the display. Optional callback will be called when the CFAx33KL acknowledges the command.
+Clears the second line of the display. An optional callback can also be passed in, please see *Optional Callback Note* for details.
+
 
 #### setBrightness(*brightness*, [*callback*])
 
-Sets the backlight brightness to 'brightness' with valid range 0-100 with 0 being off and 100 being maximum brightness. Optional callback will be called when the CFAx33KL acknowledges the command.
+Sets the backlight brightness to 'brightness' with valid range 0-100 with 0 being off and 100 being maximum brightness. An optional callback can also be passed in, please see *Optional Callback Note* for details.
 
 ```Squirrel
 // set 50% brightness
@@ -63,16 +71,16 @@ lcd.setBrightness(50);
 
 #### setContrast(*contrast*, [*callback*])
 
-Sets the backlight contrast to 'contrast' with valid range 0-100 with 0 being off and 100 being maximum contrast.
+Sets the backlight contrast to 'contrast' with valid range 0-100 with 0 being off and 100 being maximum contrast.  An optional callback can also be passed in, please see *Optional Callback Note* for details.
 
 ```Squirrel
-// set 50% contrast
-lcd.setContrast(50);
+// set 10% contrast
+lcd.setContrast(10);
 ```
 
 #### storeCurrentStateAsBootState([*callback*])
 
-Saves the current state of the LCD to non volatile memory to be displayed on boot. Optional callback will be called when the CFAx33KL acknowledges the command.
+Saves the current state of the LCD to non volatile memory to be displayed on boot. An optional callback can also be passed in, please see *Optional Callback Note* for details.
 
 ```Squirrel
 // store a useful boot-up message and state to be displayed on power-on
@@ -80,8 +88,8 @@ lcd.clearAll();
 lcd.setLine1("Electric Imp");
 lcd.setLine2("Is Excellent!");
 lcd.setBrightness(50);
-lcd.setContrast(50);
-lcd.setCurrentStateAsBootState();
+lcd.setContrast(0);
+lcd.storeCurrentStateAsBootState();
 ```
 
 #### onKeyEvent(*callback*)
@@ -143,7 +151,7 @@ lcd.onKeyEvent(function(key) {
 Callback will be called when an error is encountered. The callback must take one parameter: a string describing the error.
 
 ```Squirrel
-lcd.noError(function(errorStr) {
+lcd.onError(function(errorStr) {
     server.error(errorStr);
 });
 ```
