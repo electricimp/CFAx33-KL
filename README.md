@@ -103,7 +103,7 @@ Saves the current state of the LCD to non volatile memory to be displayed on boo
 lcd.clearAll();
 lcd.setLine1("Electric Imp");
 lcd.setLine2("Is Excellent!");
-lcd.setBrightness(50);
+lcd.setBrightness(20);
 lcd.setContrast(12);
 lcd.storeCurrentStateAsBootState();
 ```

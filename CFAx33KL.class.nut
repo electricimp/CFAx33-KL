@@ -64,7 +64,7 @@ class CFAx33KL {
     _currentRxPacket = {};
   }
 
-  function getVersion(callback = null) {
+  function getVersion(callback) {
     _versionCallback = callback;
     local packet = _buildPacket(_COMMAND_GET_VERSION, [], _convertVersionResponse.bindenv(this));
     _enqueue(packet);
@@ -333,7 +333,7 @@ class CFAx33KL {
         }
         _versionCallback({"version": version});
       } else {
-        _versionCallback({"err": "Received packet was invalid"});
+        _versionCallback({"err": "Packet received was invalid"});
       }
     }
   }
