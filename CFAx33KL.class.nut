@@ -1,7 +1,7 @@
 // Class for interfacing with the Crystalfontz CFA533-KL/KS and CFA633-KL/KS serial LCDs
 class CFAx33KL {
 
-  static version = [1, 0, 1];
+  static version = [1, 1, 0];
 
   // key codes for key activity reports
   static KEY_UP_PRESS = 1;
@@ -47,6 +47,7 @@ class CFAx33KL {
   _uart = null;
   _keyEventCallback = null;
   _errorCallback = null;
+  _versionCallback = null;
   _packetTxQueue = null; // queue of packet objects waiting to be sent
   _activeTxPacket = null; // the currenting running packet waiting for an ACK
   _currentRxState = null; // rx packet state machine state
@@ -60,6 +61,12 @@ class CFAx33KL {
     _packetTxQueue = [];
     _currentRxState = _RX_STATE_COMMAND; // initial state is to wait for start of incoming packet
     _currentRxPacket = {};
+  }
+
+  function getVersion(callback = null) {
+    _versionCallback = callback;
+    local packet = _buildPacket(_COMMAND_GET_VERSION, [], _convertVersionResponse.bindenv(this));
+    _enqueue(packet);
   }
 
   // Sets the display at point x,y to the string 'text'. Maximum length of string 'text' is 16 characters.
@@ -301,4 +308,19 @@ class CFAx33KL {
     local highByte = (b >> 8) & 0xFF;
     return (highByte << 8) + lowByte;
   }
+
+    function _convertVersionResponse(res) {
+    if(_versionCallback != null) {
+      if(res.msg.len() == 16) {
+        local version = "";
+        foreach(v in res.msg) {
+          version += v.tochar();
+        }
+        _versionCallback({"version": version});
+      } else {
+        _versionCallback({"err": "Received packet was invalid"});
+      }
+    }
+  }
+
 }

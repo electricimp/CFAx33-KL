@@ -5,11 +5,11 @@ The [CFAx33](https://www.crystalfontz.com/product/cfa533tmikl-display-module-tex
 
 The CFA533-TMI-KL is used in the Electric Imp Factory BlinkUp Box.
 
-**To add this library to your project, add** `#require "CFAx33KL.class.nut:1.0.1"` **to the top of your device code.**
+**To add this library to your project, add** `#require "CFAx33KL.class.nut:1.1.0"` **to the top of your device code.**
 
 ## Class Usage
 
-**Optional Callback Note:**  Most methods in this library contain an optional *callback* parameter.  If an optional callback is passed in, it will be called when the CFAx33KL acknowledges the command.  The callback function takes one parameter, a response table.  The response table will contain either an *err* key with an error message, or a *msg* key with the data received from the response packet.  A successful response often contains an empty array as the *msg*.
+**Optional Callback Note:**  Most methods in this library contain an optional *callback* parameter.  If an optional callback is passed in, it will be called when the CFAx33KL acknowledges the command.  The callback function takes one parameter, a response table.  The response table will contain either an *err* key with an error message, or a *msg* key with the data received from the response packet.  If no response data is expected a successful response often contains an empty array as the *msg*.
 
 
 #### Constructor
@@ -62,7 +62,7 @@ Clears the second line of the display. An optional callback can also be passed i
 
 #### setBrightness(*brightness*, [*callback*])
 
-Sets the backlight brightness to 'brightness' with valid range 0-100 with 0 being off and 100 being maximum brightness. An optional callback can also be passed in, please see *Optional Callback Note* for details.
+Sets the backlight brightness to the 'brightness' value that is passed in.  The 'brightness' parameter is an integer with a valid range 0-100 with 0 being off and 100 being maximum brightness. An optional callback can also be passed in, please see *Optional Callback Note* for details.
 
 ```Squirrel
 // set 50% brightness
@@ -71,10 +71,15 @@ lcd.setBrightness(50);
 
 #### setContrast(*contrast*, [*callback*])
 
-Sets the backlight contrast to 'contrast' with valid range 0-100 with 0 being off and 100 being maximum contrast.  An optional callback can also be passed in, please see *Optional Callback Note* for details.
+Sets the backlight contrast to the 'contrast' value that is passed in.  The 'contrast' parameter is an integer with a valid range 0-50 (see details below).  Note: currently the *setContrast* method only supports the 1 byte  “CFA633 Compatible” version of the command.  An optional callback can also be passed in, please see *Optional Callback Note* for details.
+
+Contrast Setting (0-50 valid)
+   0 = light
+ 16 = about right
+ 29 = dark
+ 30-50 = very dark (may be useful at cold temperatures)
 
 ```Squirrel
-// set 10% contrast
 lcd.setContrast(10);
 ```
 
@@ -153,5 +158,19 @@ Callback will be called when an error is encountered. The callback must take one
 ```Squirrel
 lcd.onError(function(errorStr) {
     server.error(errorStr);
+});
+```
+
+#### getVersion(*callback*)
+
+Gets the hardware and firmware version of the display from the host and passes the response to the callback.   The callback takes one parameter: a table containing either a "version" or "err" key.  For the CFA633 the version is formatted "CFA633:hX.X,yY.Y", where hX.X is the hardware revision, "h2.0" for example, and yY.Y is the firmware version "s2v1" for example.  For the CFA533 the version is formatted "CFA533:XhX,YsY".
+
+```Squirrel
+lcd.getVersion(function(res) {
+    if("err" in res) {
+        server.log(res.err);
+    } else {
+        server.log(res.version);
+    }
 });
 ```
