@@ -62,29 +62,36 @@ Clears the second line of the display. An optional callback can also be passed i
 
 #### setBrightness(*brightness*, [*callback*])
 
-Sets the backlight brightness to the 'brightness' value that is passed in.  The 'brightness' parameter is an integer with a valid range 0-100 with 0 being off and 100 being maximum brightness. An optional callback can also be passed in, please see *Optional Callback Note* for details.
+Sets the backlight brightness to the 'brightness' value(s) passed in.  The 'brightness' parameter has a valid range 0-100 with 0 being off and 100 being maximum brightness, and can be either an integer or an array containing two integers.  If one value is supplied both the keypad and LCD backlights will be set to that brightness.  If two values are supplied the first value will set the LCD brightness, and the second value will set the keypad brightness.  Note: the CFA633 only supports the single value 'brightness' control.  An optional callback can also be passed in, please see *Optional Callback Note* for details.
 
+CFA633 example:
 ```Squirrel
 // set 50% brightness
 lcd.setBrightness(50);
 ```
 
+CFA533 example:
+```Squirrel
+// set LCD to 20% and keypad 5% brightness
+lcd.setBrightness([20, 5]);
+```
+
 #### setContrast(*contrast*, [*callback*])
 
-Sets the backlight contrast to the 'contrast' value that is passed in.  The 'contrast' parameter is an integer with a valid range 0-50 (see details below).  Note: currently the *setContrast* method only supports the 1 byte  “CFA633 Compatible” version of the command.  An optional callback can also be passed in, please see *Optional Callback Note* for details.
+Sets the backlight contrast to the 'contrast' value passed in.  The 'contrast' parameter is an integer with a valid range 0-50 (see details below).  Note: currently the *setContrast* method only supports the 1 byte  “CFA633 Compatible” version of the command.  An optional callback can also be passed in, please see *Optional Callback Note* for details.
 
-Contrast Setting (0-50 valid)
+**Contrast Setting** (0-50 valid)
 <br>
-   0 = light
+0 = light
 <br>
- 16 = about right
+16 = about right
 <br>
- 29 = dark
+29 = dark
 <br>
- 30-50 = very dark (may be useful at cold temperatures)
+30-50 = very dark (may be useful at cold temperatures)
 
 ```Squirrel
-lcd.setContrast(10);
+lcd.setContrast(12);
 ```
 
 #### storeCurrentStateAsBootState([*callback*])
@@ -97,7 +104,7 @@ lcd.clearAll();
 lcd.setLine1("Electric Imp");
 lcd.setLine2("Is Excellent!");
 lcd.setBrightness(50);
-lcd.setContrast(0);
+lcd.setContrast(12);
 lcd.storeCurrentStateAsBootState();
 ```
 

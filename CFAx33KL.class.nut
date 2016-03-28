@@ -29,6 +29,7 @@ class CFAx33KL {
   static _COMMAND_SET_BRIGHTNESS = 0x0E;
   static _COMMAND_SET_CONTRAST = 0x0D;
   static _COMMAND_STORE_BOOTSTATE = 0x04;
+  static _COMMAND_GET_VERSION = 0x01;
 
   // rx reports codes
   static _REPORT_KEY_ACTIVITY = 0x80;
@@ -117,17 +118,30 @@ class CFAx33KL {
   // Sets the backlight brightness to 'brightness' with valid range 0-100 with 0 being off and 100 being maximum brightness.
   // Optional callback will be called when the CFAx33KL acknowledges the command.
   function setBrightness(brightness, callback = null) {
-    if(brightness < 0 || brightness > 100) {
-      throw "brightness must be between 0 and 100"
+    // reconcile brightness data type
+    if(typeof brightness == "integer") { brightness = [ brightness ]; }
+
+    // check that brightness in range
+    local err = false;
+    foreach(value in brightness) {
+        if( _invalidRange(value, 100) ) {
+            err = true;
+        };
     }
-    _enqueue(_buildPacket(_COMMAND_SET_BRIGHTNESS, [ brightness ], callback))
+
+    if(err){
+        throw "brightness must be between 0 and 100";
+    } else {
+        _enqueue(_buildPacket(_COMMAND_SET_BRIGHTNESS, brightness, callback));
+    }
   }
-  // Sets the backlight contrast to 'contrast' with valid range 0-100 with 0 being off and 100 being maximum contrast.
+
+  // Sets the backlight contrast to 'contrast' with valid range 0-50 with 0 being off and 50 being maximum contrast.
   function setContrast(contrast, callback = null) {
-    if(contrast < 0 || contrast > 100) {
-      throw "contrast must be between 0 and 100"
+    if(_invalidRange(contrast, 50)) {
+      throw "contrast must be between 0 and 50"
     }
-    _enqueue(_buildPacket(_COMMAND_SET_CONTRAST, [ contrast ], callback))
+    _enqueue(_buildPacket(_COMMAND_SET_CONTRAST, [ contrast ], callback));
   }
 
   // Saves the current state of the LCD to non volatile memory to be displayed on boot.
@@ -249,6 +263,7 @@ class CFAx33KL {
       _transmitNextInQueue(); // move on
     }
     local type = packet.command >> 6; // grab first two bits
+
     if(type == _PACKET_TYPE_RESPONSE && _activeTxPacket != null) {
       if((packet.command & 0x3F) == _activeTxPacket.command) { // trim first two bits, check if rx packet matches tx packet command id
         if(_activeTxPacket != null && "callback" in _activeTxPacket && _activeTxPacket.callback != null) {
@@ -259,7 +274,7 @@ class CFAx33KL {
           _errorCallback("packet ACK sequencing error!")
         }
       }
-       _activeTxPacket = null;
+      _activeTxPacket = null;
       _transmitNextInQueue(); // move on
     }
     if(type == _PACKET_TYPE_REPORT) {
@@ -309,7 +324,7 @@ class CFAx33KL {
     return (highByte << 8) + lowByte;
   }
 
-    function _convertVersionResponse(res) {
+  function _convertVersionResponse(res) {
     if(_versionCallback != null) {
       if(res.msg.len() == 16) {
         local version = "";
@@ -321,6 +336,10 @@ class CFAx33KL {
         _versionCallback({"err": "Received packet was invalid"});
       }
     }
+  }
+
+  function _invalidRange(setting, max) {
+      return (setting < 0 || setting >= max);
   }
 
 }
