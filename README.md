@@ -74,9 +74,13 @@ lcd.setBrightness(50);
 Sets the backlight contrast to the 'contrast' value that is passed in.  The 'contrast' parameter is an integer with a valid range 0-50 (see details below).  Note: currently the *setContrast* method only supports the 1 byte  “CFA633 Compatible” version of the command.  An optional callback can also be passed in, please see *Optional Callback Note* for details.
 
 Contrast Setting (0-50 valid)
+<br>
    0 = light
+<br>
  16 = about right
+<br>
  29 = dark
+<br>
  30-50 = very dark (may be useful at cold temperatures)
 
 ```Squirrel
@@ -163,7 +167,7 @@ lcd.onError(function(errorStr) {
 
 #### getVersion(*callback*)
 
-Gets the hardware and firmware version of the display from the host and passes the response to the callback.   The callback takes one parameter: a table containing either a "version" or "err" key.  For the CFA633 the version is formatted "CFA633:hX.X,yY.Y", where hX.X is the hardware revision, "h2.0" for example, and yY.Y is the firmware version "s2v1" for example.  For the CFA533 the version is formatted "CFA533:XhX,YsY".
+Gets the hardware and firmware version of the display from the host and passes the response to the callback.   The callback takes one parameter: a table containing either a "version" or "err" key.  For the CFA633 the version is formatted "CFA633:hX.X,yY.Y", where hX.X is the hardware revision and yY.Y is the firmware version.  For the CFA533 the version is formatted "CFA533:XhX,YsY".
 
 ```Squirrel
 lcd.getVersion(function(res) {
@@ -174,3 +178,7 @@ lcd.getVersion(function(res) {
     }
 });
 ```
+
+## License
+
+CFAx33-KL is licensed under the [MIT License](./LICENSE).
