@@ -73,8 +73,10 @@ class CFAx33KL {
   // Sets the display at point x,y to the string 'text'. Maximum length of string 'text' is 16 characters.
   // Optional callback will be called when the CFAx33KL acknowledges the command.
   function setText(x, y, text, callback = null) {
-    if(text.len() > _LINE_LENGTH) {
-      throw "max line length is 16 characters";
+    // Truncate text if it is too long
+    local maxLength = _LINE_LENGTH - x;
+    if(text.len() > maxLength) {
+      text = text.slice(0, maxLength);
     }
     local data = [ x, y ];
     data.extend(_stringToCharArray(text));
@@ -119,27 +121,28 @@ class CFAx33KL {
   // Optional callback will be called when the CFAx33KL acknowledges the command.
   function setBrightness(brightness, callback = null) {
     // reconcile brightness data type
-    if(typeof brightness == "integer") { brightness = [ brightness ]; }
+    if(typeof brightness == "integer" || typeof brightness == "float") { brightness = [ brightness ]; }
 
-    // check that brightness in range
+    // adjust brightness to be in range
     local err = false;
     foreach(value in brightness) {
-        if( _invalidRange(value, 100) ) {
-            err = true;
-        };
+        if(value < 0) {
+            value = 0;
+        } else if (value > 100) {
+            value = 100;
+        }
     }
+    _enqueue(_buildPacket(_COMMAND_SET_BRIGHTNESS, brightness, callback));
 
-    if(err){
-        throw "brightness must be between 0 and 100";
-    } else {
-        _enqueue(_buildPacket(_COMMAND_SET_BRIGHTNESS, brightness, callback));
-    }
   }
 
   // Sets the backlight contrast to 'contrast' with valid range 0-50 with 0 being off and 50 being maximum contrast.
   function setContrast(contrast, callback = null) {
-    if(_invalidRange(contrast, 50)) {
-      throw "contrast must be between 0 and 50"
+    // adjust contrast to be in range
+    if(contrast < 0) {
+        contrast = 0;
+    } else if (contrast > 50) {
+        contrast = 50;
     }
     _enqueue(_buildPacket(_COMMAND_SET_CONTRAST, [ contrast ], callback));
   }
@@ -336,10 +339,6 @@ class CFAx33KL {
         _versionCallback({"err": "Packet received was invalid"});
       }
     }
-  }
-
-  function _invalidRange(setting, max) {
-      return (setting < 0 || setting >= max);
   }
 
 }
