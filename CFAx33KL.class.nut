@@ -125,11 +125,11 @@ class CFAx33KL {
 
     // adjust brightness to be in range
     local err = false;
-    foreach(value in brightness) {
+    foreach(index, value in brightness) {
         if(value < 0) {
-            value = 0;
+            brightness[index] = 0;
         } else if (value > 100) {
-            value = 100;
+            brightness[index] = 100;
         }
     }
     _enqueue(_buildPacket(_COMMAND_SET_BRIGHTNESS, brightness, callback));
