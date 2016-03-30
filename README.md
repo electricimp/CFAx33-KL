@@ -186,6 +186,27 @@ lcd.getVersion(function(res) {
 });
 ```
 
+
+## Testing
+
+Tests can be launched with:
+
+```bash
+imptest test
+```
+
+By default configuration for the testing is read from [.imptest](https://github.com/electricimp/impTest/blob/develop/docs/imptest-spec.md).
+
+To run test with your settings (for example while you are developing), create your copy of **.imptest** file and name it something like **.imptest.local**, then run tests with:
+
+ ```bash
+ imptest test -c .imptest.local
+ ```
+
+### Hardware Required
+
+Tests require _imp002_ module with _CrystalFontz CFA533_ display connected to _uart6E_.
+
 ## License
 
 CFAx33-KL is licensed under the [MIT License](./LICENSE).
