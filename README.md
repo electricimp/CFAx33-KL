@@ -1,3 +1,28 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [CFAx33-KL](#cfax33-kl)
+  - [Class Usage](#class-usage)
+      - [Constructor](#constructor)
+      - [setText(*index*, *row*, *text*, [*callback*])](#settextindex-row-text-callback)
+      - [setLine1(*text*, [*callback*])](#setline1text-callback)
+      - [setLine2(*text*, [*callback*])](#setline2text-callback)
+      - [clearAll([*callback*])](#clearallcallback)
+      - [clearLine1([*callback*])](#clearline1callback)
+      - [clearLine2([*callback*])](#clearline2callback)
+      - [setBrightness(*brightness*, [*callback*])](#setbrightnessbrightness-callback)
+      - [setContrast(*contrast*, [*callback*])](#setcontrastcontrast-callback)
+      - [storeCurrentStateAsBootState([*callback*])](#storecurrentstateasbootstatecallback)
+      - [onKeyEvent(*callback*)](#onkeyeventcallback)
+      - [onError(*callback*)](#onerrorcallback)
+      - [getVersion(*callback*)](#getversioncallback)
+  - [Testing](#testing)
+    - [Hardware Required](#hardware-required)
+  - [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # CFAx33-KL
 Library Class for the CrystalFontz CFA533 and CFA633 Serial LCD Displays
 
