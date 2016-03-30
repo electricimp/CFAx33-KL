@@ -43,7 +43,7 @@ class EdgeTestCase extends ImpTestCase {
     return Promise(function (ok, err) {
       this._i.setLine1("", function (res) {
         if ("err" in res ) {
-          err("Setting empty line 1 should succeed")
+          err("Setting empty line #1 should succeed")
         } else {
           ok();
         }
@@ -58,7 +58,7 @@ class EdgeTestCase extends ImpTestCase {
     return Promise(function (ok, err) {
       this._i.setLine2("", function (res) {
         if ("err" in res ) {
-          err("Setting empty line 2 should succeed")
+          err("Setting empty line #2 should succeed")
         } else {
           ok();
         }
