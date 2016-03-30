@@ -1,4 +1,5 @@
-class DeviceTestCase extends ImpTestCase {
+
+class CycleContrastTestCase extends ImpTestCase {
   _i = null;
 
   function setUp() {
