@@ -36,7 +36,7 @@ The CFA533-TMI-KL is used in the Electric Imp Factory BlinkUp Box.
 
 ### Optional Callbacks
 
-Most methods in this library contain an optional *callback* parameter. If an callback function (inline or by reference) is passed in, it will be called when the CFAx33KL acknowledges the command. The callback function takes one parameter: a response table. This table will contain either an *err* key with an error message, or a *msg* key with the data received from the response packet. If no response data is expected, a successful response often contains an empty array as the *msg*.
+Most methods in this library contain an optional *callback* parameter. If a callback function (inline or by reference) is passed in, it will be called when the CFAx33KL acknowledges the command. The callback function takes one parameter: a response table. This table will contain either an *err* key with an error message, or a *msg* key with the data received from the response packet. If no response data is expected, a successful response often contains an empty array as the *msg*.
 
 ### Constructor: CFAx33KL(*impUART*)
 
@@ -93,7 +93,7 @@ This method clears the second line of the display. The optional callback functio
 
 ### setBrightness(*brightness[, callback]*)
 
-This method sets the keypad and LCD backlight brightness to *brightness* as a percentage, with 0 being off and 100 being maximum brightness. 
+This method sets the keypad and LCD backlight brightness to *brightness* as a percentage, with 0 being off and 100 being maximum brightness.
 
 For the CFA533 unit, you can pass either a single integer or an array of two integers. If one value is supplied, both the keypad and LCD backlights will be set to that brightness. If two values are supplied as an array, the first value will set the LCD brightness and the second value will set the keypad brightness.
 
