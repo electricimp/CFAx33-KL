@@ -73,8 +73,13 @@ class CFAx33KL {
   // Sets the display at point x,y to the string 'text'. Maximum length of string 'text' is 16 characters.
   // Optional callback will be called when the CFAx33KL acknowledges the command.
   function setText(x, y, text, callback = null) {
-    // Don't set text if empty string passed in
-    if(text == "") return;
+
+    // don't set text if empty string passed in
+    if ("" == text) {
+      if ("function" == type(callback)) {
+        callback({ "msg": []})
+      }
+    }
 
     // Truncate text if it is too long
     local maxLength = _LINE_LENGTH - x;
