@@ -74,13 +74,6 @@ class CFAx33KL {
   // Optional callback will be called when the CFAx33KL acknowledges the command.
   function setText(x, y, text, callback = null) {
 
-    // don't set text if empty string passed in
-    if ("" == text) {
-      if ("function" == type(callback)) {
-        callback({ "msg": []})
-      }
-    }
-
     // Truncate text if it is too long
     local maxLength = _LINE_LENGTH - x;
     if(text.len() > maxLength) {
@@ -300,7 +293,12 @@ class CFAx33KL {
     }
     if(type == _PACKET_TYPE_ERROR) { // error packet, if tx was invalid
       if(_activeTxPacket != null && "callback" in _activeTxPacket && _activeTxPacket.callback != null) {
-        _activeTxPacket.callback({ "err": "Transmitted packet was invalid" });
+        // treat from setting empty text as success
+        if (_activeTxPacket.command = _COMMAND_SET_TEXT && _activeTxPacket.dataLength == 2) {
+          _activeTxPacket.callback({ "msg": _activeTxPacket.data });
+        } else {
+          _activeTxPacket.callback({ "err": "Transmitted packet was invalid" });
+        }
       }
       _activeTxPacket = null;
       _transmitNextInQueue(); // move on
