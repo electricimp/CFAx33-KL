@@ -55,4 +55,12 @@ class BasicTestCase extends ImpTestCase {
       }.bindenv(this));
     }.bindenv(this));
   }
+
+  function test04_getVersion() {
+    return Promise(function (ok, err) {
+      this._i.getVersion(function (res) {
+        "err" in res ? err(res.err) : ok("Version" + res.version);
+      });
+    }.bindenv(this));
+  }
 }
