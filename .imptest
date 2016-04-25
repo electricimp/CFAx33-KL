@@ -1,0 +1,14 @@
+{
+    "modelId": "6-OG_Jtwso8A" /* FactoryBox002/CFA533 */,
+    "devices": [
+        "20000c2a69078034" /* EI.Test.M */
+    ],
+    "agentFile": false,
+    "deviceFile": "CFAx33KL.class.nut",
+    "stopOnFailure": false,
+    "timeout": 15,
+    "tests": [
+        "*.test.nut",
+        "tests/**/*.test.nut"
+    ]
+}

@@ -1,7 +1,7 @@
 // Class for interfacing with the Crystalfontz CFA533-KL/KS and CFA633-KL/KS serial LCDs
 class CFAx33KL {
 
-  static version = [1, 0, 1];
+  static version = [1, 1, 0];
 
   // key codes for key activity reports
   static KEY_UP_PRESS = 1;
@@ -29,6 +29,7 @@ class CFAx33KL {
   static _COMMAND_SET_BRIGHTNESS = 0x0E;
   static _COMMAND_SET_CONTRAST = 0x0D;
   static _COMMAND_STORE_BOOTSTATE = 0x04;
+  static _COMMAND_GET_VERSION = 0x01;
 
   // rx reports codes
   static _REPORT_KEY_ACTIVITY = 0x80;
@@ -47,6 +48,7 @@ class CFAx33KL {
   _uart = null;
   _keyEventCallback = null;
   _errorCallback = null;
+  _versionCallback = null;
   _packetTxQueue = null; // queue of packet objects waiting to be sent
   _activeTxPacket = null; // the currenting running packet waiting for an ACK
   _currentRxState = null; // rx packet state machine state
@@ -62,11 +64,20 @@ class CFAx33KL {
     _currentRxPacket = {};
   }
 
+  function getVersion(callback) {
+    _versionCallback = callback;
+    local packet = _buildPacket(_COMMAND_GET_VERSION, [], _convertVersionResponse.bindenv(this));
+    _enqueue(packet);
+  }
+
   // Sets the display at point x,y to the string 'text'. Maximum length of string 'text' is 16 characters.
   // Optional callback will be called when the CFAx33KL acknowledges the command.
   function setText(x, y, text, callback = null) {
-    if(text.len() > _LINE_LENGTH) {
-      throw "max line length is 16 characters";
+
+    // Truncate text if it is too long
+    local maxLength = _LINE_LENGTH - x;
+    if(text.len() > maxLength) {
+      text = text.slice(0, maxLength);
     }
     local data = [ x, y ];
     data.extend(_stringToCharArray(text));
@@ -110,17 +121,31 @@ class CFAx33KL {
   // Sets the backlight brightness to 'brightness' with valid range 0-100 with 0 being off and 100 being maximum brightness.
   // Optional callback will be called when the CFAx33KL acknowledges the command.
   function setBrightness(brightness, callback = null) {
-    if(brightness < 0 || brightness > 100) {
-      throw "brightness must be between 0 and 100"
+    // reconcile brightness data type
+    if(typeof brightness == "integer" || typeof brightness == "float") { brightness = [ brightness ]; }
+
+    // adjust brightness to be in range
+    local err = false;
+    foreach(index, value in brightness) {
+        if(value < 0) {
+            brightness[index] = 0;
+        } else if (value > 100) {
+            brightness[index] = 100;
+        }
     }
-    _enqueue(_buildPacket(_COMMAND_SET_BRIGHTNESS, [ brightness ], callback))
+    _enqueue(_buildPacket(_COMMAND_SET_BRIGHTNESS, brightness, callback));
+
   }
-  // Sets the backlight contrast to 'contrast' with valid range 0-100 with 0 being off and 100 being maximum contrast.
+
+  // Sets the backlight contrast to 'contrast' with valid range 0-50 with 0 being off and 50 being maximum contrast.
   function setContrast(contrast, callback = null) {
-    if(contrast < 0 || contrast > 100) {
-      throw "contrast must be between 0 and 100"
+    // adjust contrast to be in range
+    if(contrast < 0) {
+        contrast = 0;
+    } else if (contrast > 50) {
+        contrast = 50;
     }
-    _enqueue(_buildPacket(_COMMAND_SET_CONTRAST, [ contrast ], callback))
+    _enqueue(_buildPacket(_COMMAND_SET_CONTRAST, [ contrast ], callback));
   }
 
   // Saves the current state of the LCD to non volatile memory to be displayed on boot.
@@ -242,6 +267,7 @@ class CFAx33KL {
       _transmitNextInQueue(); // move on
     }
     local type = packet.command >> 6; // grab first two bits
+
     if(type == _PACKET_TYPE_RESPONSE && _activeTxPacket != null) {
       if((packet.command & 0x3F) == _activeTxPacket.command) { // trim first two bits, check if rx packet matches tx packet command id
         if(_activeTxPacket != null && "callback" in _activeTxPacket && _activeTxPacket.callback != null) {
@@ -252,7 +278,7 @@ class CFAx33KL {
           _errorCallback("packet ACK sequencing error!")
         }
       }
-       _activeTxPacket = null;
+      _activeTxPacket = null;
       _transmitNextInQueue(); // move on
     }
     if(type == _PACKET_TYPE_REPORT) {
@@ -267,7 +293,12 @@ class CFAx33KL {
     }
     if(type == _PACKET_TYPE_ERROR) { // error packet, if tx was invalid
       if(_activeTxPacket != null && "callback" in _activeTxPacket && _activeTxPacket.callback != null) {
-        _activeTxPacket.callback({ "err": "Transmitted packet was invalid" });
+        // treat from setting empty text as success
+        if (_activeTxPacket.command = _COMMAND_SET_TEXT && _activeTxPacket.dataLength == 2) {
+          _activeTxPacket.callback({ "msg": _activeTxPacket.data });
+        } else {
+          _activeTxPacket.callback({ "err": "Transmitted packet was invalid" });
+        }
       }
       _activeTxPacket = null;
       _transmitNextInQueue(); // move on
@@ -301,4 +332,19 @@ class CFAx33KL {
     local highByte = (b >> 8) & 0xFF;
     return (highByte << 8) + lowByte;
   }
+
+  function _convertVersionResponse(res) {
+    if(_versionCallback != null) {
+      if(res.msg.len() == 16) {
+        local version = "";
+        foreach(v in res.msg) {
+          version += v.tochar();
+        }
+        _versionCallback({"version": version});
+      } else {
+        _versionCallback({"err": "Packet received was invalid"});
+      }
+    }
+  }
+
 }
