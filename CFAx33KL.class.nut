@@ -3,6 +3,14 @@ class CFAx33KL {
 
   static version = [1, 1, 0];
 
+  // names for keys
+  static KEY_UP = "UP";
+  static KEY_DOWN = "DOWN";
+  static KEY_LEFT = "LEFT";
+  static KEY_RIGHT = "RIGHT";
+  static KEY_ENTER = "ENTER";
+  static KEY_EXIT = "EXIT";
+
   // key codes for key activity reports
   static KEY_UP_PRESS = 1;
   static KEY_DOWN_PRESS = 2;
@@ -16,6 +24,12 @@ class CFAx33KL {
   static KEY_RIGHT_RELEASE = 10;
   static KEY_ENTER_RELEASE = 11;
   static KEY_EXIT_RELEASE = 12;
+
+  // map for key codes to name
+  _keyToNameLookup = null;
+
+  // table keeping record of key states
+  _currentKeyStates = null;
 
   // first two bits of a packet indicate it's type
   static _PACKET_TYPE_HOST = 0x00;
@@ -62,6 +76,30 @@ class CFAx33KL {
     _packetTxQueue = [];
     _currentRxState = _RX_STATE_COMMAND; // initial state is to wait for start of incoming packet
     _currentRxPacket = {};
+
+    _keyToNameLookup = {
+      [KEY_UP_PRESS] = KEY_UP,
+      [KEY_UP_RELEASE] = KEY_UP,
+      [KEY_DOWN_PRESS] = KEY_DOWN,
+      [KEY_DOWN_RELEASE] = KEY_DOWN,
+      [KEY_LEFT_PRESS] = KEY_LEFT,
+      [KEY_LEFT_RELEASE] = KEY_LEFT,
+      [KEY_RIGHT_PRESS] = KEY_RIGHT,
+      [KEY_RIGHT_RELEASE] = KEY_RIGHT,
+      [KEY_ENTER_PRESS] = KEY_ENTER,
+      [KEY_ENTER_RELEASE] = KEY_ENTER,
+      [KEY_EXIT_PRESS] = KEY_EXIT,
+      [KEY_EXIT_RELEASE] = KEY_EXIT
+    };
+
+    _currentKeyStates = { //assume that no keys are pressed when initialized
+      [KEY_UP] = false,
+      [KEY_DOWN] = false,
+      [KEY_LEFT] = false,
+      [KEY_RIGHT] = false,
+      [KEY_ENTER] = false,
+      [KEY_EXIT] = false
+    };
   }
 
   function getVersion(callback) {
@@ -73,6 +111,8 @@ class CFAx33KL {
   // Sets the display at point x,y to the string 'text'. Maximum length of string 'text' is 16 characters.
   // Optional callback will be called when the CFAx33KL acknowledges the command.
   function setText(x, y, text, callback = null) {
+
+    if (typeof text != "string") text = text.tostring();
 
     // Truncate text if it is too long
     local maxLength = _LINE_LENGTH - x;
@@ -156,13 +196,17 @@ class CFAx33KL {
 
   // 'callback' will be called when a keypress event is received from the CFAx33KL.
   // The callback is called with one parameter corresponding to one of the CFAx33KL.KEY_* event constants.
-  function onKeyEvent(callback) {
+  function onKeyEvent(callback=null) {
     _keyEventCallback = callback;
   }
 
   // 'callback' will be called when an error is encountered with a parameter string describing the error
   function onError(callback) {
     _errorCallback = callback;
+  }
+
+  function getKeyState(key) {
+    return _currentKeyStates[key]
   }
 
   // construct a packet table
@@ -285,6 +329,7 @@ class CFAx33KL {
       if(packet.command == _REPORT_KEY_ACTIVITY) { // key press packet
         if(packet.dataLength == 1) {
           local key = packet.data[0];
+          if (key >= 1 && key <= 12) _currentKeyStates[_keyToNameLookup[key]] <- (key <= 6 ? true : false);
           if(_keyEventCallback != null) {
             _keyEventCallback(key); // call key event cb
           }
