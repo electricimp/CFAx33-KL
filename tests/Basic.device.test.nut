@@ -1,4 +1,3 @@
-
 class BasicTestCase extends ImpTestCase {
   _i = null;
 

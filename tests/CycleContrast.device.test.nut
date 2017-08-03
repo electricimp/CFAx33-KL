@@ -1,4 +1,3 @@
-
 class CycleContrastTestCase extends ImpTestCase {
   _i = null;
 
