@@ -1,7 +1,7 @@
 {
-    "modelId": "6-OG_Jtwso8A" /* FactoryBox002/CFA533 */,
+    "modelId": "VwbGoh6BD4T" /* FactoryBox002 */,
     "devices": [
-        "20000c2a69078034" /* EI.Test.M */
+        "20000c2a690a2f53" /* EI.Test.Q */
     ],
     "agentFile": false,
     "deviceFile": "CFAx33KL.class.nut",
