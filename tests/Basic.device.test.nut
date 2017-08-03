@@ -12,7 +12,6 @@ class BasicTestCase extends ImpTestCase {
    */
   function test01_setRandomText() {
     return Promise(function (ok, err) {
-
       this._i.setText(0, 0, "################", function (res) {
         if ("err" in res) {
           err(res.err)
