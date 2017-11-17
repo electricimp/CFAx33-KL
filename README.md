@@ -145,29 +145,29 @@ This method specifies a callback function to be executed when a keypress event i
 lcd.setLine1("Key Test");
 lcd.clearLine2();
 lcd.onKeyEvent(function(key) {
-  if (key == lcd.KEY_UP_PRESS) {
+  if (key == CFAx33KL.KEY_UP_PRESS) {
     cd.setLine2("UP Pressed");
-  } else if (key == lcd.KEY_DOWN_PRESS) {
+  } else if (key == CFAx33KL.KEY_DOWN_PRESS) {
     lcd.setLine2("DOWN Pressed");
-  } else if (key == lcd.KEY_LEFT_PRESS) {
+  } else if (key == CFAx33KL.KEY_LEFT_PRESS) {
     lcd.setLine2("LEFT Pressed");
-  } else if (key == lcd.KEY_RIGHT_PRESS) {
+  } else if (key == CFAx33KL.KEY_RIGHT_PRESS) {
     lcd.setLine2("RIGHT Pressed");
-  } else if (key == lcd.KEY_ENTER_PRESS) {
+  } else if (key == CFAx33KL.KEY_ENTER_PRESS) {
     lcd.setLine2("OK Pressed");
-  } else if (key == lcd.KEY_EXIT_PRESS) {
+  } else if (key == CFAx33KL.KEY_EXIT_PRESS) {
     lcd.setLine2("EXIT Pressed");
-  } else if (key == lcd.KEY_UP_RELEASE) {
+  } else if (key == CFAx33KL.KEY_UP_RELEASE) {
     lcd.setLine2("UP Released");
-  } else if (key == lcd.KEY_DOWN_RELEASE) {
+  } else if (key == CFAx33KL.KEY_DOWN_RELEASE) {
     lcd.setLine2("DOWN Released");
-  } else if (key == lcd.KEY_LEFT_RELEASE) {
+  } else if (key == CFAx33KL.KEY_LEFT_RELEASE) {
     lcd.setLine2("LEFT Released");
-  } else if (key == lcd.KEY_RIGHT_RELEASE) {
+  } else if (key == CFAx33KL.KEY_RIGHT_RELEASE) {
     lcd.setLine2("RIGHT Released");
-  } else if (key == lcd.KEY_ENTER_RELEASE) {
+  } else if (key == CFAx33KL.KEY_ENTER_RELEASE) {
     lcd.setLine2("OK Released");
-  } else if (key == lcd.KEY_EXIT_RELEASE) {
+  } else if (key == CFAx33KL.KEY_EXIT_RELEASE) {
     lcd.setLine2("EXIT Released");
   } else {
     lcd.setLine2("Unknown Key!");
