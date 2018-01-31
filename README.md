@@ -1,4 +1,4 @@
-# CFAx33-KL #
+# CFAx33KL #
 
 This library provides support for CrystalFontz CFA533 and CFA633 serial LCD displays. The [CFAx33](https://www.crystalfontz.com/product/cfa533tmikl-display-module-text-uart-16x2) series integrates a keypad and the LCD with a simple UART interface. The display lines can be written or cleared individually or together, and the backlight is controllable. Keypress callbacks can be attached to a class instance to handle specific key presses.
 
