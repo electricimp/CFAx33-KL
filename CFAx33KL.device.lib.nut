@@ -37,6 +37,14 @@ const CFAx33KL_KEY_RIGHT_RELEASE        = 10;
 const CFAx33KL_KEY_ENTER_RELEASE        = 11;
 const CFAx33KL_KEY_EXIT_RELEASE         = 12;
 
+// Names for keys
+const CFAx33KL_KEY_UP                   = "UP";
+const CFAx33KL_KEY_DOWN                 = "DOWN";
+const CFAx33KL_KEY_LEFT                 = "LEFT";
+const CFAx33KL_KEY_RIGHT                = "RIGHT";
+const CFAx33KL_KEY_ENTER                = "ENTER";
+const CFAx33KL_KEY_EXIT                 = "EXIT";
+
 // First two bits of a packet indicate it's type
 const CFAx33KL_PACKET_TYPE_HOST         = 0x00;
 const CFAx33KL_PACKET_TYPE_RESPONSE     = 0x01;
@@ -75,14 +83,16 @@ class CFAx33KL {
 
   static version = "2.0.0";
 
-  _uart = null;
+  _uart             = null;
   _keyEventCallback = null;
-  _errorCallback = null;
-  _versionCallback = null;
-  _packetTxQueue = null; // queue of packet objects waiting to be sent
-  _activeTxPacket = null; // the currenting running packet waiting for an ACK
-  _currentRxState = null; // rx packet state machine state
-  _currentRxPacket = null; // rx packet being constructed by state machine
+  _errorCallback    = null;
+  _versionCallback  = null;
+  _packetTxQueue    = null; // queue of packet objects waiting to be sent
+  _activeTxPacket   = null; // the currenting running packet waiting for an ACK
+  _currentRxState   = null; // rx packet state machine state
+  _currentRxPacket  = null; // rx packet being constructed by state machine
+  _keyToNameLookup  = null; // map for key codes to name
+  _currentKeyStates = null; // table keeping record of key states
 
   // Constructs a new instance of CFAx33KL.
   // This WILL reset your UART configuration for the supplied uart parameter.
@@ -92,6 +102,30 @@ class CFAx33KL {
     _packetTxQueue = [];
     _currentRxState = CFAx33KL_RX_STATE_COMMAND; // initial state is to wait for start of incoming packet
     _currentRxPacket = {};
+
+    _keyToNameLookup = {
+      [CFAx33KL_KEY_UP_PRESS]      = CFAx33KL_KEY_UP,
+      [CFAx33KL_KEY_UP_RELEASE]    = CFAx33KL_KEY_UP,
+      [CFAx33KL_KEY_DOWN_PRESS]    = CFAx33KL_KEY_DOWN,
+      [CFAx33KL_KEY_DOWN_RELEASE]  = CFAx33KL_KEY_DOWN,
+      [CFAx33KL_KEY_LEFT_PRESS]    = CFAx33KL_KEY_LEFT,
+      [CFAx33KL_KEY_LEFT_RELEASE]  = CFAx33KL_KEY_LEFT,
+      [CFAx33KL_KEY_RIGHT_PRESS]   = CFAx33KL_KEY_RIGHT,
+      [CFAx33KL_KEY_RIGHT_RELEASE] = CFAx33KL_KEY_RIGHT,
+      [CFAx33KL_KEY_ENTER_PRESS]   = CFAx33KL_KEY_ENTER,
+      [CFAx33KL_KEY_ENTER_RELEASE] = CFAx33KL_KEY_ENTER,
+      [CFAx33KL_KEY_EXIT_PRESS]    = CFAx33KL_KEY_EXIT,
+      [CFAx33KL_KEY_EXIT_RELEASE]  = CFAx33KL_KEY_EXIT
+    };
+
+    _currentKeyStates = { //assume that no keys are pressed when initialized
+      [CFAx33KL_KEY_UP]    = false,
+      [CFAx33KL_KEY_DOWN]  = false,
+      [CFAx33KL_KEY_LEFT]  = false,
+      [CFAx33KL_KEY_RIGHT] = false,
+      [CFAx33KL_KEY_ENTER] = false,
+      [CFAx33KL_KEY_EXIT]  = false
+    };
   }
 
   function getVersion(callback) {
@@ -195,6 +229,10 @@ class CFAx33KL {
   // 'callback' will be called when an error is encountered with a parameter string describing the error
   function onError(callback) {
     _errorCallback = callback;
+  }
+
+  function getKeyState(key) {
+    return _currentKeyStates[key]
   }
 
   // construct a packet table
@@ -317,6 +355,9 @@ class CFAx33KL {
       if(packet.command == CFAx33KL_REPORT_KEY_ACTIVITY) { // key press packet
         if(packet.dataLength == 1) {
           local key = packet.data[0];
+          if (key >= 1 && key <= 12) {
+            _currentKeyStates[_keyToNameLookup[key]] <- (key <= 6 ? true : false);
+          }
           if(_keyEventCallback != null) {
             _keyEventCallback(key); // call key event cb
           }

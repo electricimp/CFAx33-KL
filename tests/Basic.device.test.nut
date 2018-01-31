@@ -2,13 +2,20 @@ class BasicTestCase extends ImpTestCase {
   _i = null;
 
   function setUp() {
-    this._i = CFAx33KL(hardware.uart6E);
-    this._i.setContrast(16);
-    this._i.clearAll();
-    this._i.onError(function(e) {
-      this.info(e);
-    }.bindenv(this))
-    return "Basic tests";
+    return Promise(function (ok, err) {
+      this._i = CFAx33KL(hardware.uart6E);
+      this._i.setContrast(16);
+      this._i.onError(function(e) {
+        this.info(e);
+      }.bindenv(this))
+      this._i.clearAll(function(res1) {
+        this._i.setText(0, 0, "Basic Tests", function(res) {
+          imp.wakeup(2, function() {
+            ("err" in res || "err" in res1) ? err(res.err) : ok("Basic tests");
+          }.bindenv(this))
+        }.bindenv(this))
+      }.bindenv(this))
+    }.bindenv(this));
   }
 
   /**
@@ -83,7 +90,10 @@ class BasicTestCase extends ImpTestCase {
   }
 
   function tearDown() {
-    this._i = CFAx33KL(hardware.uart6E);
-    this._i.clearAll();
+    return Promise(function (ok, err) {
+      this._i.clearAll(function(res) {
+        ok("Basic tests completed");
+      }.bindenv(this));
+    }.bindenv(this));
   }
 }

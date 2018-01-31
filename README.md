@@ -147,7 +147,7 @@ lcd.setLine1("Key Test");
 lcd.clearLine2();
 lcd.onKeyEvent(function(key) {
   if (key == CFAx33KL_KEY_UP_PRESS) {
-    cd.setLine2("UP Pressed");
+    lcd.setLine2("UP Pressed");
   } else if (key == CFAx33KL_KEY_DOWN_PRESS) {
     lcd.setLine2("DOWN Pressed");
   } else if (key == CFAx33KL_KEY_LEFT_PRESS) {
@@ -175,6 +175,25 @@ lcd.onKeyEvent(function(key) {
   }
 });
 ```
+
+### getKeyState(*keyName*)
+
+This method takes one parameter *keyName*: a *CFAx33KL_KEY_<NAME>* constant and returns a boolean `true` if the key is pressed, `false` otherwise.  
+
+| Key Name Constants   |
+| -------------------- |
+| CFAx33KL_KEY_UP      |
+| CFAx33KL_KEY_DOWN    |
+| CFAx33KL_KEY_LEFT    |
+| CFAx33KL_KEY_RIGHT   |
+| CFAx33KL_KEY_ENTER   |
+| CFAx33KL_KEY_EXIT    |
+
+```Squirrel
+local state = lcd.getKeyState(CFAx33KL_KEY_UP));
+server.log("Up key is pressed: " + state);
+```
+
 
 ### onError(*callback*)
 
