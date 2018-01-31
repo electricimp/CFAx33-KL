@@ -236,4 +236,4 @@ lcd.getVersion(function(response) {
 
 ## License ##
 
-CFAx33-KL is licensed under the [MIT License](./LICENSE).
+CFAx33KL is licensed under the [MIT License](./LICENSE).
