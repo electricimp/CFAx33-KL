@@ -35,12 +35,12 @@ An optional callback can also be provided; please see [‘Optional Callbacks’]
 #### Example ####
 
 ```Squirrel
-lcd.setText(0, 0, "Hello World!", function(res) {
-    if ("err" in res) {
-        server.error(res.err);
-    } else {
-        server.log("Text received by display");
-    }
+lcd.setText(0, 0, "Hello World!", function(response) {
+  if ("err" in response) {
+    server.error(response.err);
+  } else {
+    server.log("Text received by display");
+  }
 });
 ```
 
