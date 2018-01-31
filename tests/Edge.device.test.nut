@@ -3,7 +3,11 @@ class EdgeTestCase extends ImpTestCase {
 
   function setUp() {
     this._i = CFAx33KL(hardware.uart6E);
-    return "This should iterate contrast from 50 to 0";
+    this._i.setContrast(16);
+    this._i.onError(function(e) {
+      this.info(e);
+    }.bindenv(this))
+    return "Testing edge cases";
   }
 
   /**
@@ -12,7 +16,7 @@ class EdgeTestCase extends ImpTestCase {
   function test_setTextOffBoundaries() {
     return Promise(function (ok, err) {
       this._i.setText(18, 0, "###", function (res) {
-        if (!"err" in res || res.err != "Transmitted packet was invalid") {
+        if (!"err" in res || res.err != CFAx33KL_ERROR_TX_INVALID) {
           err(res.err)
         } else {
           ok("Got expected error");
@@ -30,9 +34,10 @@ class EdgeTestCase extends ImpTestCase {
         if ("err" in res ) {
           err("Setting empty text should succeed")
         } else {
+          this.info("settting empty string");
           ok();
         }
-      });
+      }.bindenv(this));
     }.bindenv(this));
   }
 
@@ -45,9 +50,10 @@ class EdgeTestCase extends ImpTestCase {
         if ("err" in res ) {
           err("Setting empty line #1 should succeed")
         } else {
+          this.info("settting empty string");
           ok();
         }
-      });
+      }.bindenv(this));
     }.bindenv(this));
   }
 
@@ -60,9 +66,10 @@ class EdgeTestCase extends ImpTestCase {
         if ("err" in res ) {
           err("Setting empty line #2 should succeed")
         } else {
+          this.info("settting empty string");
           ok();
         }
-      });
+      }.bindenv(this));
     }.bindenv(this));
   }
 }

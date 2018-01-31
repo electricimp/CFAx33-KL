@@ -1,11 +1,12 @@
 # CFAx33-KL
+
 Library Class for the CrystalFontz CFA533 and CFA633 Serial LCD Displays
 
 The [CFAx33](https://www.crystalfontz.com/product/cfa533tmikl-display-module-text-uart-16x2) family of displays is an integrated keypad + LCD with a simple UART interface. The display lines can be written or cleared individually or together, and the backlight is controllable. Keypress callbacks can be attached to a class instance to handle specific key presses.
 
 The CFA533-TMI-KL is used in the Electric Imp Factory BlinkUp Box.
 
-**To add this library to your project, add** `#require "CFAx33KL.class.nut:1.1.0"` **to the top of your device code.**
+**To add this library to your project, add** `#require "CFAx33KL.device.lib.nut:2.0.0"` **to the top of your device code.**
 
 ## Class Usage
 
@@ -18,7 +19,7 @@ Most methods in this library contain an optional *callback* parameter. If a call
 The constructor takes one (required) parameter: an imp UART object which will be configured by the constructor.
 
 ```Squirrel
-#require "CFAx33KL.class.nut:1.1.0"
+#require "CFAx33KL.device.lib.nut:2.0.0"
 
 lcd <- CFAx33KL(hardware.uart6E);
 ```
@@ -62,7 +63,7 @@ This method clears the entire display. The optional callback function will be ca
 
 This method clears the first line of the display. The optional callback function will be called when the CFAx33KL acknowledges the command; please see [Optional Callbacks](#optional-callbacks) for details.
 
-#### clearLine2(*[callback]*)
+### clearLine2(*[callback]*)
 
 This method clears the second line of the display. The optional callback function will be called when the CFAx33KL acknowledges the command; please see [Optional Callbacks](#optional-callbacks) for details.
 
@@ -123,51 +124,51 @@ lcd.storeCurrentStateAsBootState();
 
 ### onKeyEvent(*callback*)
 
-This method specifies a callback function to be executed when a keypress event is received from the CFAx33KL. The callback is called with one parameter, one of the *CFAx33KL.KEY_<EVENT>* constants:
+This method specifies a callback function to be executed when a keypress event is received from the CFAx33KL. To clear a previously set callback pass in `null` instead of a callback function. The callback is called with one parameter, one of the *CFAx33KL_KEY_<EVENT>* constants:
 
-| Key Event Constants |
-| ------------------- |
-| KEY_UP_PRESS |
-| KEY_DOWN_PRESS |
-| KEY_LEFT_PRESS |
-| KEY_RIGHT_PRESS |
-| KEY_ENTER_PRESS |
-| KEY_EXIT_PRESS |
-| KEY_UP_RELEASE |
-| KEY_DOWN_RELEASE |
-| KEY_LEFT_RELEASE |
-| KEY_RIGHT_RELEASE |
-| KEY_ENTER_RELEASE |
-| KEY_EXIT_RELEASE |
+| Key Event Constants        |
+| -------------------------- |
+| CFAx33KL_KEY_UP_PRESS      |
+| CFAx33KL_KEY_DOWN_PRESS    |
+| CFAx33KL_KEY_LEFT_PRESS    |
+| CFAx33KL_KEY_RIGHT_PRESS   |
+| CFAx33KL_KEY_ENTER_PRESS   |
+| CFAx33KL_KEY_EXIT_PRESS    |
+| CFAx33KL_KEY_UP_RELEASE    |
+| CFAx33KL_KEY_DOWN_RELEASE  |
+| CFAx33KL_KEY_LEFT_RELEASE  |
+| CFAx33KL_KEY_RIGHT_RELEASE |
+| CFAx33KL_KEY_ENTER_RELEASE |
+| CFAx33KL_KEY_EXIT_RELEASE  |
 
 ```Squirrel
 // Test the LCD's integrated keys
 lcd.setLine1("Key Test");
 lcd.clearLine2();
 lcd.onKeyEvent(function(key) {
-  if (key == lcd.KEY_UP_PRESS) {
+  if (key == CFAx33KL_KEY_UP_PRESS) {
     cd.setLine2("UP Pressed");
-  } else if (key == lcd.KEY_DOWN_PRESS) {
+  } else if (key == CFAx33KL_KEY_DOWN_PRESS) {
     lcd.setLine2("DOWN Pressed");
-  } else if (key == lcd.KEY_LEFT_PRESS) {
+  } else if (key == CFAx33KL_KEY_LEFT_PRESS) {
     lcd.setLine2("LEFT Pressed");
-  } else if (key == lcd.KEY_RIGHT_PRESS) {
+  } else if (key == CFAx33KL_KEY_RIGHT_PRESS) {
     lcd.setLine2("RIGHT Pressed");
-  } else if (key == lcd.KEY_ENTER_PRESS) {
+  } else if (key == CFAx33KL_KEY_ENTER_PRESS) {
     lcd.setLine2("OK Pressed");
-  } else if (key == lcd.KEY_EXIT_PRESS) {
+  } else if (key == CFAx33KL_KEY_EXIT_PRESS) {
     lcd.setLine2("EXIT Pressed");
-  } else if (key == lcd.KEY_UP_RELEASE) {
+  } else if (key == CFAx33KL_KEY_UP_RELEASE) {
     lcd.setLine2("UP Released");
-  } else if (key == lcd.KEY_DOWN_RELEASE) {
+  } else if (key == CFAx33KL_KEY_DOWN_RELEASE) {
     lcd.setLine2("DOWN Released");
-  } else if (key == lcd.KEY_LEFT_RELEASE) {
+  } else if (key == CFAx33KL_KEY_LEFT_RELEASE) {
     lcd.setLine2("LEFT Released");
-  } else if (key == lcd.KEY_RIGHT_RELEASE) {
+  } else if (key == CFAx33KL_KEY_RIGHT_RELEASE) {
     lcd.setLine2("RIGHT Released");
-  } else if (key == lcd.KEY_ENTER_RELEASE) {
+  } else if (key == CFAx33KL_KEY_ENTER_RELEASE) {
     lcd.setLine2("OK Released");
-  } else if (key == lcd.KEY_EXIT_RELEASE) {
+  } else if (key == CFAx33KL_KEY_EXIT_RELEASE) {
     lcd.setLine2("EXIT Released");
   } else {
     lcd.setLine2("Unknown Key!");
@@ -175,9 +176,9 @@ lcd.onKeyEvent(function(key) {
 });
 ```
 
-#### onError(*callback*)
+### onError(*callback*)
 
-This method specifies the callback function that will be executed when an error is encountered. The callback must take one parameter: a variable into which a string containing a description of the error will be placed.
+This method specifies the callback function that will be executed when an error is encountered. To clear a previously set callback pass in `null` instead of a callback function. The callback must take one parameter: a variable into which a string containing a description of the error will be placed.
 
 ```Squirrel
 lcd.onError(function(errorString) {
@@ -199,26 +200,6 @@ lcd.getVersion(function(res) {
 });
 ```
 
-
-## Testing
-
-Tests can be launched with:
-
-```bash
-imptest test
-```
-
-By default configuration for the testing is read from [.imptest](https://github.com/electricimp/impTest/blob/develop/docs/imptest-spec.md).
-
-To run test with your settings (for example while you are developing), create your copy of **.imptest** file and name it something like **.imptest.local**, then run tests with:
-
- ```bash
- imptest test -c .imptest.local
- ```
-
-### Hardware Required
-
-Tests require _imp002_ module with _CrystalFontz CFA533_ display connected to _uart6E_.
 
 ## License
 

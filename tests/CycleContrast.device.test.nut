@@ -3,6 +3,9 @@ class CycleContrastTestCase extends ImpTestCase {
 
   function setUp() {
     this._i = CFAx33KL(hardware.uart6E);
+    this._i.onError(function(e) {
+      this.info(e);
+    }.bindenv(this))
     return "This should iterate contrast from 50 to 0";
   }
 
@@ -21,14 +24,23 @@ class CycleContrastTestCase extends ImpTestCase {
       }.bindenv(this));
 
       imp.wakeup(4, function() {
-        this._i.setContrast(16);
+        this._i.setContrast(20);
       }.bindenv(this));
 
       imp.wakeup(6, function() {
+        this._i.setContrast(16);
+      }.bindenv(this));
+
+      imp.wakeup(8, function() {
         this._i.setContrast(1);
         ok();
       }.bindenv(this));
 
     }.bindenv(this));
+  }
+
+  function tearDown() {
+    this._i = CFAx33KL(hardware.uart6E);
+    this._i.setContrast(16);
   }
 }
