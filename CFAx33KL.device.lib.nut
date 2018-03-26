@@ -1,72 +1,136 @@
+// MIT License
+
+// Copyright 2015-18 Electric Imp
+
+// SPDX-License-Identifier: MIT
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+// EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
+// OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+// OTHER DEALINGS IN THE SOFTWARE.
+
+
+// Key codes for key activity reports
+const CFAx33KL_KEY_UP_PRESS             = 1;
+const CFAx33KL_KEY_DOWN_PRESS           = 2;
+const CFAx33KL_KEY_LEFT_PRESS           = 3;
+const CFAx33KL_KEY_RIGHT_PRESS          = 4;
+const CFAx33KL_KEY_ENTER_PRESS          = 5;
+const CFAx33KL_KEY_EXIT_PRESS           = 6;
+const CFAx33KL_KEY_UP_RELEASE           = 7;
+const CFAx33KL_KEY_DOWN_RELEASE         = 8;
+const CFAx33KL_KEY_LEFT_RELEASE         = 9;
+const CFAx33KL_KEY_RIGHT_RELEASE        = 10;
+const CFAx33KL_KEY_ENTER_RELEASE        = 11;
+const CFAx33KL_KEY_EXIT_RELEASE         = 12;
+
+// Names for keys
+const CFAx33KL_KEY_UP                   = "UP";
+const CFAx33KL_KEY_DOWN                 = "DOWN";
+const CFAx33KL_KEY_LEFT                 = "LEFT";
+const CFAx33KL_KEY_RIGHT                = "RIGHT";
+const CFAx33KL_KEY_ENTER                = "ENTER";
+const CFAx33KL_KEY_EXIT                 = "EXIT";
+
+// First two bits of a packet indicate it's type
+const CFAx33KL_PACKET_TYPE_HOST         = 0x00;
+const CFAx33KL_PACKET_TYPE_RESPONSE     = 0x01;
+const CFAx33KL_PACKET_TYPE_REPORT       = 0x02;
+const CFAx33KL_PACKET_TYPE_ERROR        = 0x03;
+
+// TX command codes
+const CFAx33KL_COMMAND_SET_TEXT         = 0x1F;
+const CFAx33KL_COMMAND_CLEAR_ALL        = 0x06;
+const CFAx33KL_COMMAND_SET_BRIGHTNESS   = 0x0E;
+const CFAx33KL_COMMAND_SET_CONTRAST     = 0x0D;
+const CFAx33KL_COMMAND_STORE_BOOTSTATE  = 0x04;
+const CFAx33KL_COMMAND_GET_VERSION      = 0x01;
+
+// RX reports codes
+const CFAx33KL_REPORT_KEY_ACTIVITY      = 0x80;
+
+// Packet RX state machine states
+const CFAx33KL_RX_STATE_COMMAND         = 0;
+const CFAx33KL_RX_STATE_DATA_LENGTH     = 1;
+const CFAx33KL_RX_STATE_DATA            = 2;
+const CFAx33KL_RX_STATE_CRC_FIRST_BYTE  = 3;
+const CFAx33KL_RX_STATE_CRC_SECOND_BYTE = 4;
+
+const CFAx33KL_LINE_LENGTH              = 16; // this is a 16x2 character LCD
+const CFAx33KL_BLANK_LINE               = "                "; // 16 spaces
+const CFAx33KL_UART_BAUD                = 19200; // default baud rate
+
+const CFAx33KL_ERROR_CRC                = "Received packet failed CRC";
+const CFAx33KL_ERROR_ACK_SEQUENCING     = "Packet ACK sequencing error";
+const CFAx33KL_ERROR_TX_INVALID         = "Transmitted packet was invalid";
+const CFAx33KL_ERROR_RX_INVALID         = "Received packet was invalid";
+
 // Class for interfacing with the Crystalfontz CFA533-KL/KS and CFA633-KL/KS serial LCDs
 class CFAx33KL {
 
-  static version = [1, 1, 0];
+  static version = "2.0.0";
 
-  // key codes for key activity reports
-  static KEY_UP_PRESS = 1;
-  static KEY_DOWN_PRESS = 2;
-  static KEY_LEFT_PRESS = 3;
-  static KEY_RIGHT_PRESS = 4;
-  static KEY_ENTER_PRESS = 5;
-  static KEY_EXIT_PRESS = 6;
-  static KEY_UP_RELEASE = 7;
-  static KEY_DOWN_RELEASE = 8;
-  static KEY_LEFT_RELEASE = 9;
-  static KEY_RIGHT_RELEASE = 10;
-  static KEY_ENTER_RELEASE = 11;
-  static KEY_EXIT_RELEASE = 12;
-
-  // first two bits of a packet indicate it's type
-  static _PACKET_TYPE_HOST = 0x00;
-  static _PACKET_TYPE_RESPONSE = 0x01;
-  static _PACKET_TYPE_REPORT = 0x02;
-  static _PACKET_TYPE_ERROR = 0x03;
-
-  // tx command codes
-  static _COMMAND_SET_TEXT = 0x1F;
-  static _COMMAND_CLEAR_ALL = 0x06;
-  static _COMMAND_SET_BRIGHTNESS = 0x0E;
-  static _COMMAND_SET_CONTRAST = 0x0D;
-  static _COMMAND_STORE_BOOTSTATE = 0x04;
-  static _COMMAND_GET_VERSION = 0x01;
-
-  // rx reports codes
-  static _REPORT_KEY_ACTIVITY = 0x80;
-
-  // packet rx state machine states
-  static _RX_STATE_COMMAND = 0;
-  static _RX_STATE_DATA_LENGTH = 1;
-  static _RX_STATE_DATA = 2;
-  static _RX_STATE_CRC_FIRST_BYTE = 3;
-  static _RX_STATE_CRC_SECOND_BYTE = 4;
-
-  static _LINE_LENGTH = 16; // this is a 16x2 character LCD
-  static _BLANK_LINE = "                "; // 16 spaces
-  static _UART_BAUD = 19200; // default baud rate
-
-  _uart = null;
+  _uart             = null;
   _keyEventCallback = null;
-  _errorCallback = null;
-  _versionCallback = null;
-  _packetTxQueue = null; // queue of packet objects waiting to be sent
-  _activeTxPacket = null; // the currenting running packet waiting for an ACK
-  _currentRxState = null; // rx packet state machine state
-  _currentRxPacket = null; // rx packet being constructed by state machine
+  _errorCallback    = null;
+  _versionCallback  = null;
+  _packetTxQueue    = null; // queue of packet objects waiting to be sent
+  _activeTxPacket   = null; // the currenting running packet waiting for an ACK
+  _currentRxState   = null; // rx packet state machine state
+  _currentRxPacket  = null; // rx packet being constructed by state machine
+  _keyToNameLookup  = null; // map for key codes to name
+  _currentKeyStates = null; // table keeping record of key states
 
   // Constructs a new instance of CFAx33KL.
   // This WILL reset your UART configuration for the supplied uart parameter.
   constructor(uart) {
     _uart = uart
-    _uart.configure(_UART_BAUD, 8, PARITY_NONE, 1, NO_CTSRTS, _uartReceive.bindenv(this))
+    _uart.configure(CFAx33KL_UART_BAUD, 8, PARITY_NONE, 1, NO_CTSRTS, _uartReceive.bindenv(this))
     _packetTxQueue = [];
-    _currentRxState = _RX_STATE_COMMAND; // initial state is to wait for start of incoming packet
+    _currentRxState = CFAx33KL_RX_STATE_COMMAND; // initial state is to wait for start of incoming packet
     _currentRxPacket = {};
+
+    _keyToNameLookup = {
+      [CFAx33KL_KEY_UP_PRESS]      = CFAx33KL_KEY_UP,
+      [CFAx33KL_KEY_UP_RELEASE]    = CFAx33KL_KEY_UP,
+      [CFAx33KL_KEY_DOWN_PRESS]    = CFAx33KL_KEY_DOWN,
+      [CFAx33KL_KEY_DOWN_RELEASE]  = CFAx33KL_KEY_DOWN,
+      [CFAx33KL_KEY_LEFT_PRESS]    = CFAx33KL_KEY_LEFT,
+      [CFAx33KL_KEY_LEFT_RELEASE]  = CFAx33KL_KEY_LEFT,
+      [CFAx33KL_KEY_RIGHT_PRESS]   = CFAx33KL_KEY_RIGHT,
+      [CFAx33KL_KEY_RIGHT_RELEASE] = CFAx33KL_KEY_RIGHT,
+      [CFAx33KL_KEY_ENTER_PRESS]   = CFAx33KL_KEY_ENTER,
+      [CFAx33KL_KEY_ENTER_RELEASE] = CFAx33KL_KEY_ENTER,
+      [CFAx33KL_KEY_EXIT_PRESS]    = CFAx33KL_KEY_EXIT,
+      [CFAx33KL_KEY_EXIT_RELEASE]  = CFAx33KL_KEY_EXIT
+    };
+
+    _currentKeyStates = { //assume that no keys are pressed when initialized
+      [CFAx33KL_KEY_UP]    = false,
+      [CFAx33KL_KEY_DOWN]  = false,
+      [CFAx33KL_KEY_LEFT]  = false,
+      [CFAx33KL_KEY_RIGHT] = false,
+      [CFAx33KL_KEY_ENTER] = false,
+      [CFAx33KL_KEY_EXIT]  = false
+    };
   }
 
   function getVersion(callback) {
     _versionCallback = callback;
-    local packet = _buildPacket(_COMMAND_GET_VERSION, [], _convertVersionResponse.bindenv(this));
+    local packet = _buildPacket(CFAx33KL_COMMAND_GET_VERSION, [], _convertVersionResponse.bindenv(this));
     _enqueue(packet);
   }
 
@@ -74,14 +138,16 @@ class CFAx33KL {
   // Optional callback will be called when the CFAx33KL acknowledges the command.
   function setText(x, y, text, callback = null) {
 
+    if (typeof text != "string") text = text.tostring();
+
     // Truncate text if it is too long
-    local maxLength = _LINE_LENGTH - x;
+    local maxLength = CFAx33KL_LINE_LENGTH - x;
     if(text.len() > maxLength) {
       text = text.slice(0, maxLength);
     }
     local data = [ x, y ];
     data.extend(_stringToCharArray(text));
-    local packet = _buildPacket(_COMMAND_SET_TEXT, data, callback);
+    local packet = _buildPacket(CFAx33KL_COMMAND_SET_TEXT, data, callback);
     _enqueue(packet)
   }
 
@@ -102,20 +168,20 @@ class CFAx33KL {
   // Clears the entire display.
   // Optional callback will be called when the CFAx33KL acknowledges the command.
   function clearAll(callback = null) {
-    local packet = _buildPacket(_COMMAND_CLEAR_ALL, [], callback);
+    local packet = _buildPacket(CFAx33KL_COMMAND_CLEAR_ALL, [], callback);
     _enqueue(packet);
   }
 
   // Clears the first line of the display.
   // Optional callback will be called when the CFAx33KL acknowledges the command.
   function clearLine1(callback = null) {
-    setText(0,0, _BLANK_LINE, callback);
+    setText(0,0, CFAx33KL_BLANK_LINE, callback);
   }
 
   // Clears the second line of the display.
   // Optional callback will be called when the CFAx33KL acknowledges the command.
   function clearLine2(callback = null) {
-    setText(0,1, _BLANK_LINE, callback);
+    setText(0,1, CFAx33KL_BLANK_LINE, callback);
   }
 
   // Sets the backlight brightness to 'brightness' with valid range 0-100 with 0 being off and 100 being maximum brightness.
@@ -133,7 +199,7 @@ class CFAx33KL {
             brightness[index] = 100;
         }
     }
-    _enqueue(_buildPacket(_COMMAND_SET_BRIGHTNESS, brightness, callback));
+    _enqueue(_buildPacket(CFAx33KL_COMMAND_SET_BRIGHTNESS, brightness, callback));
 
   }
 
@@ -145,13 +211,13 @@ class CFAx33KL {
     } else if (contrast > 50) {
         contrast = 50;
     }
-    _enqueue(_buildPacket(_COMMAND_SET_CONTRAST, [ contrast ], callback));
+    _enqueue(_buildPacket(CFAx33KL_COMMAND_SET_CONTRAST, [ contrast ], callback));
   }
 
   // Saves the current state of the LCD to non volatile memory to be displayed on boot.
   // Optional callback will be called when the CFAx33KL acknowledges the command.
   function storeCurrentStateAsBootState(callback = null) {
-    _enqueue(_buildPacket(_COMMAND_STORE_BOOTSTATE, [], callback));
+    _enqueue(_buildPacket(CFAx33KL_COMMAND_STORE_BOOTSTATE, [], callback));
   }
 
   // 'callback' will be called when a keypress event is received from the CFAx33KL.
@@ -163,6 +229,10 @@ class CFAx33KL {
   // 'callback' will be called when an error is encountered with a parameter string describing the error
   function onError(callback) {
     _errorCallback = callback;
+  }
+
+  function getKeyState(key) {
+    return _currentKeyStates[key]
   }
 
   // construct a packet table
@@ -223,32 +293,32 @@ class CFAx33KL {
   // rx state machine
   function _processIncomingByte(byte) {
     switch(_currentRxState) {
-      case _RX_STATE_COMMAND:
+      case CFAx33KL_RX_STATE_COMMAND:
         _currentRxPacket.command <- byte;
-        _currentRxState = _RX_STATE_DATA_LENGTH;
+        _currentRxState = CFAx33KL_RX_STATE_DATA_LENGTH;
       break;
-      case _RX_STATE_DATA_LENGTH:
+      case CFAx33KL_RX_STATE_DATA_LENGTH:
         _currentRxPacket.dataLength <- byte;
         _currentRxPacket.data <- [];
         if(_currentRxPacket.dataLength > 0) {
-          _currentRxState = _RX_STATE_DATA;
+          _currentRxState = CFAx33KL_RX_STATE_DATA;
         } else {
-          _currentRxState = _RX_STATE_CRC_FIRST_BYTE;
+          _currentRxState = CFAx33KL_RX_STATE_CRC_FIRST_BYTE;
         }
       break;
-      case _RX_STATE_DATA:
+      case CFAx33KL_RX_STATE_DATA:
         _currentRxPacket.data.push(byte);
         if(_currentRxPacket.data.len() >= _currentRxPacket.dataLength) {
-          _currentRxState = _RX_STATE_CRC_FIRST_BYTE;
+          _currentRxState = CFAx33KL_RX_STATE_CRC_FIRST_BYTE;
         }
       break;
-      case _RX_STATE_CRC_FIRST_BYTE:
+      case CFAx33KL_RX_STATE_CRC_FIRST_BYTE:
         _currentRxPacket.crc <- byte;
-        _currentRxState = _RX_STATE_CRC_SECOND_BYTE;
+        _currentRxState = CFAx33KL_RX_STATE_CRC_SECOND_BYTE;
       break;
-      case _RX_STATE_CRC_SECOND_BYTE:
+      case CFAx33KL_RX_STATE_CRC_SECOND_BYTE:
         _currentRxPacket.crc = (byte << 8) + _currentRxPacket.crc; // LSB first
-        _currentRxState = _RX_STATE_COMMAND;
+        _currentRxState = CFAx33KL_RX_STATE_COMMAND;
         _processPacket(_currentRxPacket); // all done, process packet
       break;
     }
@@ -261,43 +331,46 @@ class CFAx33KL {
     local crc = _crc(bytes);
     if(crc != packet.crc) { // bad CRC
       if(_activeTxPacket != null && "callback" in _activeTxPacket && _activeTxPacket.callback != null) {
-        _activeTxPacket.callback({ "err": "Received packet failed CRC" });
+        _activeTxPacket.callback({ "err": CFAx33KL_ERROR_CRC });
       }
       _activeTxPacket = null;
       _transmitNextInQueue(); // move on
     }
     local type = packet.command >> 6; // grab first two bits
 
-    if(type == _PACKET_TYPE_RESPONSE && _activeTxPacket != null) {
+    if(type == CFAx33KL_PACKET_TYPE_RESPONSE && _activeTxPacket != null) {
       if((packet.command & 0x3F) == _activeTxPacket.command) { // trim first two bits, check if rx packet matches tx packet command id
         if(_activeTxPacket != null && "callback" in _activeTxPacket && _activeTxPacket.callback != null) {
           _activeTxPacket.callback({ "msg": packet.data });
         }
       } else { // ack id does not match rx id
         if(_errorCallback != null) {
-          _errorCallback("packet ACK sequencing error!")
+          _errorCallback(CFAx33KL_ERROR_ACK_SEQUENCING)
         }
       }
       _activeTxPacket = null;
       _transmitNextInQueue(); // move on
     }
-    if(type == _PACKET_TYPE_REPORT) {
-      if(packet.command == _REPORT_KEY_ACTIVITY) { // key press packet
+    if(type == CFAx33KL_PACKET_TYPE_REPORT) {
+      if(packet.command == CFAx33KL_REPORT_KEY_ACTIVITY) { // key press packet
         if(packet.dataLength == 1) {
           local key = packet.data[0];
+          if (key >= 1 && key <= 12) {
+            _currentKeyStates[_keyToNameLookup[key]] <- (key <= 6 ? true : false);
+          }
           if(_keyEventCallback != null) {
             _keyEventCallback(key); // call key event cb
           }
         }
       }
     }
-    if(type == _PACKET_TYPE_ERROR) { // error packet, if tx was invalid
+    if(type == CFAx33KL_PACKET_TYPE_ERROR) { // error packet, if tx was invalid
       if(_activeTxPacket != null && "callback" in _activeTxPacket && _activeTxPacket.callback != null) {
         // treat from setting empty text as success
-        if (_activeTxPacket.command = _COMMAND_SET_TEXT && _activeTxPacket.dataLength == 2) {
+        if (_activeTxPacket.command = CFAx33KL_COMMAND_SET_TEXT && _activeTxPacket.dataLength == 2) {
           _activeTxPacket.callback({ "msg": _activeTxPacket.data });
         } else {
-          _activeTxPacket.callback({ "err": "Transmitted packet was invalid" });
+          _activeTxPacket.callback({ "err": CFAx33KL_ERROR_TX_INVALID });
         }
       }
       _activeTxPacket = null;
@@ -342,7 +415,7 @@ class CFAx33KL {
         }
         _versionCallback({"version": version});
       } else {
-        _versionCallback({"err": "Packet received was invalid"});
+        _versionCallback({"err": CFAx33KL_ERROR_RX_INVALID});
       }
     }
   }

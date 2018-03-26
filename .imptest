@@ -1,12 +1,12 @@
 {
-    "modelId": "IXNy9EzomNXK" /* J */,
+    "modelId": "VwbGoh6BD4T-" /* FacotryBox02 */,
     "devices": [
-        "20000c2a690a33e4" /* J */
+        "20000c2a690a3841" /* FF */
     ],
     "agentFile": false,
-    "deviceFile": "CFAx33KL.class.nut",
+    "deviceFile": "CFAx33KL.device.lib.nut",
     "stopOnFailure": false,
-    "timeout": 15,
+    "timeout": 30,
     "tests": [
         "*.test.nut",
         "tests/**/*.test.nut"

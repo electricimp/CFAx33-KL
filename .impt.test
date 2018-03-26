@@ -1,0 +1,12 @@
+{
+  "deviceGroupId": "5b931ff6-a46f-93a5-e044-45884e5466bd",
+  "timeout": 30,
+  "stopOnFail": false,
+  "allowDisconnect": false,
+  "builderCache": false,
+  "testFiles": [
+    "*.test.nut",
+    "tests/**/*.test.nut"
+  ],
+  "deviceFile": "CFAx33KL.device.lib.nut"
+}
